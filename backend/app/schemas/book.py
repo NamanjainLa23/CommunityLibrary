@@ -6,18 +6,24 @@ class BookBase(BaseModel):
     title: str
     author: Optional[str] = None
     isbn: Optional[str] = None
-    quantity: Optional[int] = 1
     is_public: Optional[bool] = True
+    description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class BookCreate(BookBase):
     pass
+
+class BookFromISBN(BaseModel):
+    isbn: str
+    is_public: Optional[bool] = True
 
 class BookUpdate(BookBase):
     title: Optional[str] = None
     author: Optional[str] = None
     isbn: Optional[str] = None
-    quantity: Optional[int] = 1
     is_public: Optional[bool] = True
+    description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class BookOut(BookBase):
     id: int

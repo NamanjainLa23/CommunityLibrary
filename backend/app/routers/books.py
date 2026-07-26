@@ -3,8 +3,10 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.db import get_db
 from app.schemas import book as book_schemas
+from app.schemas.book import BookFromISBN
 from app.core.security import get_current_user
 from app.models.book import Book as BookModel
+from app.core.isbn import fetch_book_by_isbn
 
 router = APIRouter(prefix="/api/books", tags=["books"])
 
@@ -21,6 +23,46 @@ def create_book(payload: book_schemas.BookCreate, db: Session = Depends(get_db),
     db.add(book)
     db.commit()
     db.refresh(book)
+    return book
+
+@router.post("/by-isbn", response_model=book_schemas.BookOut, status_code=status.HTTP_201_CREATED)
+def create_book_from_isbn(payload: BookFromISBN, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    existing = None
+    if payload.isbn:
+        exisiting = db.query(BookModel).filter(BookModel.isbn == payload.isbn).first()
+    
+    if exisiting:
+        title = exisiting.title
+        author = exisiting.author
+        description = exisiting.description
+        image_url = exisiting.image_url
+        isbn_val = exisiting.isbn or payload.isbn
+
+    else:
+        meta = fetch_book_by_isbn(payload.isbn)
+        if not meta:
+            raise HTTPException(status_code=404, detail="Book metadata not found for given ISBN")
+        title = meta.get("title") or f"Unknown title ({payload.isbn})"
+        author = meta.get("author")
+        description = meta.description
+        image_url = meta.image_url
+        isbn_val = meta.isbn or payload.isbn
+
+    
+    book = BookModel(
+        owner_id = current_user.id,
+        title = title,
+        author = author,
+        isbn = isbn_val,
+        is_public = payload.is_public if payload.is_public is not None else True,
+        description = description,
+        image_url = image_url
+    )
+
+    db.add(book)
+    db.commit()
+    db.refresh(book)
+
     return book
 
 @router.get("/me", response_model=List[book_schemas.BookOut])
