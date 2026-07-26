@@ -7,7 +7,7 @@ class Book(Base):
     __tablename__ = "books"
     
     id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"), ondelete="CASCADE", nullable=False, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     title = Column(String, nullable=False)
     author = Column(String, nullable=False)
     isbn = Column(String, nullable=False, index = True)
