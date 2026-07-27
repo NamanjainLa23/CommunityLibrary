@@ -7,6 +7,7 @@ from app.schemas.book import BookFromISBN
 from app.core.security import get_current_user
 from app.models.book import Book as BookModel
 from app.core.isbn import fetch_book_by_isbn
+from uuid import UUID
 
 router = APIRouter(prefix="/api/books", tags=["books"])
 
@@ -17,8 +18,9 @@ def create_book(payload: book_schemas.BookCreate, db: Session = Depends(get_db),
         title=payload.title,
         author=payload.author,
         isbn=payload.isbn,
-        quantity=payload.quantity or 1,
         is_public=payload.is_public if payload.is_public is not None else True,
+        description = payload.description,
+        image_url = payload.image_url
     )
     db.add(book)
     db.commit()
@@ -70,14 +72,14 @@ def list_my_books(db: Session = Depends(get_db), current_user = Depends(get_curr
     return db.query(BookModel).filter(BookModel.owner_id == current_user.id).all()
 
 @router.get("/public", response_model=List[book_schemas.BookOut])
-def list_public_books(owner_id: int | None = None, db: Session = Depends(get_db)):
+def list_public_books(owner_id: UUID | None = None, db: Session = Depends(get_db)):
     q = db.query(BookModel).filter(BookModel.is_public == True)
     if owner_id:
         q = q.filter(BookModel.owner_id == owner_id)
     return q.all()
 
 @router.get("/{book_id}", response_model=book_schemas.BookOut)
-def get_book(book_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def get_book(book_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     book = db.query(BookModel).filter(BookModel.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
@@ -87,7 +89,7 @@ def get_book(book_id: int, db: Session = Depends(get_db), current_user = Depends
     return book
 
 @router.put("/{book_id}", response_model=book_schemas.BookOut)
-def update_book(book_id: int, payload: book_schemas.BookUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def update_book(book_id: UUID, payload: book_schemas.BookUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     book = db.query(BookModel).filter(BookModel.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
@@ -101,7 +103,7 @@ def update_book(book_id: int, payload: book_schemas.BookUpdate, db: Session = De
     return book
 
 @router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_book(book_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def delete_book(book_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     book = db.query(BookModel).filter(BookModel.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")

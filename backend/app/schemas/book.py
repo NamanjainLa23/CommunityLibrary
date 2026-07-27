@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+from uuid import UUID
 
 class BookBase(BaseModel):
     title: str
@@ -26,8 +27,8 @@ class BookUpdate(BookBase):
     image_url: Optional[str] = None
 
 class BookOut(BookBase):
-    id: int
-    owner_id: int
+    id: UUID
+    owner_id: UUID
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
