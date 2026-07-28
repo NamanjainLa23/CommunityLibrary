@@ -46,9 +46,9 @@ def create_book_from_isbn(payload: BookFromISBN, db: Session = Depends(get_db), 
             raise HTTPException(status_code=404, detail="Book metadata not found for given ISBN")
         title = meta.get("title") or f"Unknown title ({payload.isbn})"
         author = meta.get("author")
-        description = meta.description
-        image_url = meta.image_url
-        isbn_val = meta.isbn or payload.isbn
+        description = meta.get("description")
+        image_url = meta.get("image_url")
+        isbn_val = meta.get("isbn") or payload.isbn
 
     
     book = BookModel(
