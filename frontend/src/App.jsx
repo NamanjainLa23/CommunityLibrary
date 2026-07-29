@@ -18,6 +18,10 @@ function App() {
         <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/add-book" element={<PrivateRoute><AddBook/></PrivateRoute>} />
+        <Route path="/my-books" element={<PrivateRoute><MyBooks/></PrivateRoute>} />
+        <Route path="/user/:usernameOrId" element={<UserProfile/>} />
+        <Route path="/search" element={<Search/>} />
         <Route path="/dashboard" element={
           <PrivateRoute><Dashboard/></PrivateRoute>
         } />
