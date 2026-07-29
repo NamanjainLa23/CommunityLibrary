@@ -2,6 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import AddBook from "./pages/AddBook";
+import MyBooks from "./pages/MyBooks"
+import UserProfile from "./pages/UserProfile";
+import Search from "./pages/Search";
 import { loadToken } from "./services/auth";
 
 function App() {
