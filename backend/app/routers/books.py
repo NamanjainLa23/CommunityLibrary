@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.db import get_db
 from app.schemas import book as book_schemas
 from app.schemas.book import BookFromISBN
 from app.core.security import get_current_user
 from app.models.book import Book as BookModel
+from app.models.user import User as UserModel
 from app.core.isbn import fetch_book_by_isbn
 from uuid import UUID
 
@@ -72,10 +73,14 @@ def list_my_books(db: Session = Depends(get_db), current_user = Depends(get_curr
     return db.query(BookModel).filter(BookModel.owner_id == current_user.id).all()
 
 @router.get("/public", response_model=List[book_schemas.BookOut])
-def list_public_books(owner_id: UUID | None = None, db: Session = Depends(get_db)):
+def list_public_books(owner_id: Optional[UUID] = None, owner_username: Optional[str] = None, db: Session = Depends(get_db)):
     q = db.query(BookModel).filter(BookModel.is_public == True)
     if owner_id:
         q = q.filter(BookModel.owner_id == owner_id)
+    elif owner_username:
+        user = db.query(UserModel).filter((UserModel.username == owner_username) | (UserModel.mobile == owner_username)).first()
+        if not user:
+            return []
     return q.all()
 
 @router.get("/{book_id}", response_model=book_schemas.BookOut)
