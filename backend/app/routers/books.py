@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from typing import List, Optional
 from app.db import get_db
 from app.schemas import book as book_schemas
@@ -81,6 +82,24 @@ def list_public_books(owner_id: Optional[UUID] = None, owner_username: Optional[
         user = db.query(UserModel).filter((UserModel.username == owner_username) | (UserModel.mobile == owner_username)).first()
         if not user:
             return []
+    return q.all()
+
+
+@router.get("/search", response_model=List[book_schemas.BookOut])
+def search_books(query: str, db: Session = Depends(get_db)):
+    qstr = f"%{query}"
+
+    q = db.query(BookModel).join(UserModel, BookModel.owner_id == UserModel.id).filter(BookModel.is_public == True)
+
+    filters = (
+        BookModel.title.ilike(qstr),
+        BookModel.author.ilike(qstr),
+        BookModel.isbn.ilike(qstr),
+        UserModel.username.ilike(qstr),
+        UserModel.mobile.ilike(qstr),
+    )
+
+    q = q.filter(or_(*filters))
     return q.all()
 
 @router.get("/{book_id}", response_model=book_schemas.BookOut)
