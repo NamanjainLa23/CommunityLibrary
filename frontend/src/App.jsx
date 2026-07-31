@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import AddBook from "./pages/AddBook";
 import MyBooks from "./pages/MyBooks"
 import UserProfile from "./pages/UserProfile";
+import NearbyBooks from "./pages/NearbyBooks";
 import Search from "./pages/Search";
 import { loadToken } from "./services/auth";
 
@@ -25,6 +26,7 @@ function App() {
         <Route path="/add-book" element={<PrivateRoute><AddBook/></PrivateRoute>} />
         <Route path="/my-books" element={<PrivateRoute><MyBooks/></PrivateRoute>} />
         <Route path="/user/:usernameOrId" element={<UserProfile/>} />
+        <Route path="/users" element={<PrivateRoute><NearbyBooks/></PrivateRoute>} />
         <Route path="/search" element={<Search/>} />
         <Route path="/dashboard" element={
           <PrivateRoute><Dashboard/></PrivateRoute>

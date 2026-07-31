@@ -4,13 +4,13 @@ import { useNavigate } from "react-router-dom";
 import MyBooks from "./MyBooks";
 import AddBook from "./AddBook";
 import Search from "./Search";
-import UserSearch from "./UserSearch";
+import NearbyBooks from "./NearbyBooks";
 import BorrowedBooks from "./BorrowedBooks";
 
 const TABS = [
   { key: "my", label: "My Books" },
   { key: "borrowed", label: "Borrowed" },
-  { key: "user", label: "Search User" },
+  { key: "nearby", label: "Nearby Books" },
   { key: "book", label: "Search Book" },
   { key: "add", label: "Add / Manage" },
 ];
@@ -58,7 +58,7 @@ export default function Dashboard() {
           <div>
             {tab === 'my' && <MyBooks />}
             {tab === 'borrowed' && <BorrowedBooks />}
-            {tab === 'user' && <UserSearch />}
+            {tab === 'nearby' && <NearbyBooks />}
             {tab === 'book' && <Search />}
             {tab === 'add' && <AddBook />}
           </div>
