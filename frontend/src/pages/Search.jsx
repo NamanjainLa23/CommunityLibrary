@@ -49,6 +49,17 @@ export default function Search() {
               <div className="text-sm text-gray-600">{b.author}</div>
               <div className="text-xs text-gray-500">ISBN: {b.isbn} — Owner ID: {b.owner_id}</div>
             </div>
+            <div className="flex flex-col gap-2">
+              <button onClick={async ()=>{
+                if(!confirm('Request to borrow this book?')) return;
+                try{
+                  await api.post('/borrow_requests', { book_id: b.id, message: '' });
+                  alert('Borrow request sent');
+                }catch(e){
+                  alert('Failed to send request');
+                }
+              }} className="bg-indigo-600 text-white px-3 py-1 rounded">Request Borrow</button>
+            </div>
           </div>
         ))}
       </div>
