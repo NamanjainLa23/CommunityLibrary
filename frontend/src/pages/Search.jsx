@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Fuse from "fuse.js";
 
 export default function Search() {
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [results, setResults] = useState([]);
   const [info, setInfo] = useState("");
@@ -51,6 +53,7 @@ export default function Search() {
             </div>
             <div className="flex flex-col gap-2">
               <button onClick={async ()=>{
+                if(!localStorage.getItem('booklender_token')){ navigate('/login'); return; }
                 if(!confirm('Request to borrow this book?')) return;
                 try{
                   await api.post('/borrow_requests', { book_id: b.id, message: '' });
