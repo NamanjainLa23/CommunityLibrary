@@ -26,6 +26,7 @@ class Book(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     owner = relationship("User", back_populates="books")
+    borrow_requests = relationship("BorrowRequest", back_populates="book")
     
     def __repr__(self):
         return f"<Book {self.title}>"

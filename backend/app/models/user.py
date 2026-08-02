@@ -19,3 +19,5 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     books = relationship("Book", back_populates="owner")
+    borrow_requests = relationship("BorrowRequest", back_populates="requester", foreign_keys="BorrowRequest.requester_id")
+    owned_borrow_requests = relationship("BorrowRequest", back_populates="owner", foreign_keys="BorrowRequest.owner_id")
