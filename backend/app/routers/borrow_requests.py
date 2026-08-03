@@ -11,7 +11,7 @@ from app.core.email import send_email
 
 router = APIRouter(prefix="/api/borrow_requests", tags=["borrow_requests"])
 
-
+@router.post("", response_model=borrow_schemas.BorrowRequestOut, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=borrow_schemas.BorrowRequestOut, status_code=status.HTTP_201_CREATED)
 def create_request(payload: borrow_schemas.BorrowRequestCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     # validate book

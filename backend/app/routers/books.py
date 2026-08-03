@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from typing import List, Optional
 from app.db import get_db
+from sqlalchemy.orm import joinedload
 from app.schemas import book as book_schemas
 from app.schemas.book import BookFromISBN
 from app.core.security import get_current_user
@@ -83,7 +84,15 @@ def list_public_books(owner_id: Optional[UUID] = None, owner_username: Optional[
         user = db.query(UserModel).filter((UserModel.username == owner_username) | (UserModel.mobile == owner_username)).first()
         if not user:
             return []
-    return q.all()
+    books = q.options(joinedload(BookModel.owner)).all()
+
+    for b in books:
+        try:
+            b.owner_username = b.owner.username if getattr(b, 'owner', None) else None
+        except Exception:
+            b.owner_username = None
+
+    return books
 
 
 @router.get("/search", response_model=List[book_schemas.BookOut])
@@ -103,7 +112,15 @@ def search_books(query: str, db: Session = Depends(get_db)):
         UserModel.mobile.ilike(qstr),
     )
     q = q.filter(or_(*filters))
-    return q.all()
+    books = q.options(joinedload(BookModel.owner)).all()
+
+    for b in books:
+        try:
+            b.owner_username = b.owner.username if getattr(b, 'owner', None) else None
+        except Exception:
+            b.owner_username = None
+
+    return books
 
 
 @router.get('/borrowed', response_model=List[book_schemas.BookOut])
@@ -114,7 +131,15 @@ def list_borrowed_books(status: Optional[str] = None, db: Session = Depends(get_
     """
     st = status or 'approved'
     q = db.query(BookModel).join(BorrowModel, BorrowModel.book_id == BookModel.id).filter(BorrowModel.requester_id == current_user.id, BorrowModel.status == st)
-    return q.all()
+    books = q.options(joinedload(BookModel.owner)).all()
+
+    for b in books:
+        try:
+            b.owner_username = b.owner.username if getattr(b, 'owner', None) else None
+        except Exception:
+            b.owner_username = None
+
+    return books
 
 @router.get("/{book_id}", response_model=book_schemas.BookOut)
 def get_book(book_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):

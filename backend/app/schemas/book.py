@@ -29,6 +29,7 @@ class BookUpdate(BookBase):
 class BookOut(BookBase):
     id: UUID
     owner_id: UUID
+    owner_username: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
