@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 export default function NearbyBooks(){
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [selected, setSelected] = useState(null);
   const [books, setBooks] = useState([]);
@@ -61,6 +63,7 @@ export default function NearbyBooks(){
               </div>
               <div className="ml-auto flex flex-col gap-2">
                 <button onClick={async ()=>{
+                  if(!localStorage.getItem('booklender_token')){ navigate('/login'); return; }
                   if(!confirm('Request to borrow this book?')) return;
                   try{
                     await api.post('/borrow_requests', { book_id: b.id, message: '' });

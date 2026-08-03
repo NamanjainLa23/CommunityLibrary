@@ -10,6 +10,7 @@ from app.models.book import Book as BookModel
 from app.models.user import User as UserModel
 from app.core.isbn import fetch_book_by_isbn
 from uuid import UUID
+from app.models.borrow import BorrowRequest as BorrowModel
 
 router = APIRouter(prefix="/api/books", tags=["books"])
 
@@ -87,10 +88,13 @@ def list_public_books(owner_id: Optional[UUID] = None, owner_username: Optional[
 
 @router.get("/search", response_model=List[book_schemas.BookOut])
 def search_books(query: str, db: Session = Depends(get_db)):
-    qstr = f"%{query}"
+    """Server-side search across title, author, isbn and owner username/mobile.
 
+    Returns only public books matching the query.
+    """
+    qstr = f"%{query}%"
+    # join with users to allow searching by username/mobile
     q = db.query(BookModel).join(UserModel, BookModel.owner_id == UserModel.id).filter(BookModel.is_public == True)
-
     filters = (
         BookModel.title.ilike(qstr),
         BookModel.author.ilike(qstr),
@@ -98,8 +102,18 @@ def search_books(query: str, db: Session = Depends(get_db)):
         UserModel.username.ilike(qstr),
         UserModel.mobile.ilike(qstr),
     )
-
     q = q.filter(or_(*filters))
+    return q.all()
+
+
+@router.get('/borrowed', response_model=List[book_schemas.BookOut])
+def list_borrowed_books(status: Optional[str] = None, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    """Return books borrowed by the current user. By default returns approved borrows.
+
+    Optional query param `status` can filter by borrow request status (e.g. pending, approved).
+    """
+    st = status or 'approved'
+    q = db.query(BookModel).join(BorrowModel, BorrowModel.book_id == BookModel.id).filter(BorrowModel.requester_id == current_user.id, BorrowModel.status == st)
     return q.all()
 
 @router.get("/{book_id}", response_model=book_schemas.BookOut)
