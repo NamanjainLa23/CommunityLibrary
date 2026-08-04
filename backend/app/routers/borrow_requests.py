@@ -82,7 +82,7 @@ def received_requests(db: Session = Depends(get_db), current_user = Depends(get_
 
 
 @router.get('/lent', response_model=List[borrow_schemas.BorrowRequestOut])
-def lent_items(status: str | None = None, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def lent_items(status: str | None = "completed", db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     # books lent out by current user (owner)
     q = db.query(BorrowModel).filter(BorrowModel.owner_id == current_user.id)
     if status:
@@ -107,9 +107,19 @@ def update_request_status(req_id: int, payload: borrow_schemas.BorrowRequestUpda
     # only owner can change status
     if br.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail='Only owner can change request status')
-    allowed = {'approved', 'rejected', 'completed', 'cancelled'}
-    if payload.status not in allowed:
-        raise HTTPException(status_code=400, detail='Invalid status')
+
+    transitions = {
+        'pending': {'approved', 'rejected'},
+        'approved': {'completed', 'rejected'},
+        'completed': set(),
+        'rejected': set(),
+    }
+
+    allowed_next = transitions.get(br.status, set())
+
+    if payload.status not in allowed_next:
+        raise HTTPException(status_code=400, detail=f"cannot transition from {br.status} to {payload.status}")
+        
     br.status = payload.status
     db.add(br)
     db.commit()

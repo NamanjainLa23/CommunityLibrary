@@ -8,7 +8,7 @@ export default function LentBooks(){
   const load = async ()=>{
     setErr("");
     try{
-      const res = await api.get('/borrow_requests/lent');
+      const res = await api.get("/borrow_requests/lent?status=completed");
       setItems(res.data || []);
     }catch(e){
       setErr('Failed to load lent items');
@@ -37,9 +37,6 @@ export default function LentBooks(){
               <div className="font-medium">{r.book_title || 'book'}</div>
               <div className="text-sm text-gray-600">Borrowed by: {r.requester_username || r.requester_id}</div>
               <div className="text-xs text-gray-500">Status: {r.status}</div>
-            </div>
-            <div className="flex flex-col gap-2">
-              {r.status === 'approved' && <button onClick={()=>markCompleted(r.id)} className="bg-indigo-600 text-white px-3 py-1 rounded">Mark Completed</button>}
             </div>
           </div>
         ))}

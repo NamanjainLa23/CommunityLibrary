@@ -42,9 +42,10 @@ export default function Requests(){
               <div className="text-xs text-gray-500">Status: {r.status}</div>
             </div>
             <div className="flex flex-col gap-2">
-              {r.status !== 'approved' && <button onClick={()=>changeStatus(r.id, 'approved')} className="bg-green-600 text-white px-3 py-1 rounded">Approve</button>}
-              {r.status !== 'rejected' && <button onClick={()=>changeStatus(r.id, 'rejected')} className="bg-red-600 text-white px-3 py-1 rounded">Reject</button>}
-              {r.status === 'approved' && <button onClick={()=>changeStatus(r.id, 'completed')} className="bg-indigo-600 text-white px-3 py-1 rounded">Mark Completed</button>}
+              {r.status === 'pending' && (<> <button onClick={()=>changeStatus(r.id, 'approved')} className="bg-green-600 text-white px-3 py-1 rounded">Approve</button>  <button onClick={()=>changeStatus(r.id, 'rejected')} className="bg-red-600 text-white px-3 py-1 rounded">Reject</button> </> )}
+              {r.status === 'approved' && (<> <button onClick={()=>changeStatus(r.id, 'completed')} className="bg-indigo-600 text-white px-3 py-1 rounded">Mark Completed</button> <button onClick={()=>changeStatus(r.id, 'rejected')} className="bg-red-600 text-white px-3 py-1 rounded">Reject</button> </> )}
+              {/*{r.status !== 'rejected' && <button onClick={()=>changeStatus(r.id, 'rejected')} className="bg-red-600 text-white px-3 py-1 rounded">Reject</button>}*/}
+              {/*{r.status === 'approved' && <button onClick={()=>changeStatus(r.id, 'completed')} className="bg-indigo-600 text-white px-3 py-1 rounded">Mark Completed</button>}*/}
             </div>
           </div>
         ))}
