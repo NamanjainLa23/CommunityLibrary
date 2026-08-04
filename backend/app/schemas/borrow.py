@@ -17,6 +17,14 @@ class BorrowRequestOut(BaseModel):
     status: str
     message: Optional[str]
     created_at: Optional[datetime]
+    requester_username: Optional[str] = None
+    owner_username: Optional[str] = None
+    book_title: Optional[str] = None
+    book_image_url: Optional[str] = None
 
     class Config:
         orm_mode = True
+
+
+class BorrowRequestUpdate(BaseModel):
+    status: str

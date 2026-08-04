@@ -11,6 +11,7 @@ from app.core.email import send_email
 
 router = APIRouter(prefix="/api/borrow_requests", tags=["borrow_requests"])
 
+
 @router.post("", response_model=borrow_schemas.BorrowRequestOut, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=borrow_schemas.BorrowRequestOut, status_code=status.HTTP_201_CREATED)
 def create_request(payload: borrow_schemas.BorrowRequestCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
@@ -41,14 +42,101 @@ def create_request(payload: borrow_schemas.BorrowRequestCreate, db: Session = De
     body = f"User {current_user.username or current_user.mobile} (id={current_user.id}) requests to borrow your book '{book.title}'.\n\nMessage:\n{payload.message or ''}\n\nVisit the app to respond."
     send_email(owner.email or owner.mobile or '','Borrow request', body)
 
+    # attach extra fields for response
+    try:
+        br.requester_username = current_user.username
+        br.owner_username = owner.username
+        br.book_title = book.title
+        br.book_image_url = getattr(book, 'image_url', None)
+    except Exception:
+        pass
     return br
 
 
 @router.get("/me", response_model=List[borrow_schemas.BorrowRequestOut])
 def my_requests(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    return db.query(BorrowModel).filter(BorrowModel.requester_id == current_user.id).all()
+    items = db.query(BorrowModel).filter(BorrowModel.requester_id == current_user.id).all()
+    for it in items:
+        try:
+            it.requester_username = it.requester.username if getattr(it, 'requester', None) else None
+            it.owner_username = it.owner.username if getattr(it, 'owner', None) else None
+            it.book_title = it.book.title if getattr(it, 'book', None) else None
+            it.book_image_url = getattr(it.book, 'image_url', None) if getattr(it, 'book', None) else None
+        except Exception:
+            pass
+    return items
 
 
 @router.get("/received", response_model=List[borrow_schemas.BorrowRequestOut])
 def received_requests(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    return db.query(BorrowModel).filter(BorrowModel.owner_id == current_user.id).all()
+    items = db.query(BorrowModel).filter(BorrowModel.owner_id == current_user.id).all()
+    for it in items:
+        try:
+            it.requester_username = it.requester.username if getattr(it, 'requester', None) else None
+            it.owner_username = it.owner.username if getattr(it, 'owner', None) else None
+            it.book_title = it.book.title if getattr(it, 'book', None) else None
+            it.book_image_url = getattr(it.book, 'image_url', None) if getattr(it, 'book', None) else None
+        except Exception:
+            pass
+    return items
+
+
+@router.get('/lent', response_model=List[borrow_schemas.BorrowRequestOut])
+def lent_items(status: str | None = None, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    # books lent out by current user (owner)
+    q = db.query(BorrowModel).filter(BorrowModel.owner_id == current_user.id)
+    if status:
+        q = q.filter(BorrowModel.status == status)
+    items = q.all()
+    for it in items:
+        try:
+            it.requester_username = it.requester.username if getattr(it, 'requester', None) else None
+            it.owner_username = it.owner.username if getattr(it, 'owner', None) else None
+            it.book_title = it.book.title if getattr(it, 'book', None) else None
+            it.book_image_url = getattr(it.book, 'image_url', None) if getattr(it, 'book', None) else None
+        except Exception:
+            pass
+    return items
+
+
+@router.patch('/{req_id}/status', response_model=borrow_schemas.BorrowRequestOut)
+def update_request_status(req_id: int, payload: borrow_schemas.BorrowRequestUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    br = db.query(BorrowModel).filter(BorrowModel.id == req_id).first()
+    if not br:
+        raise HTTPException(status_code=404, detail='Borrow request not found')
+    # only owner can change status
+    if br.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail='Only owner can change request status')
+    allowed = {'approved', 'rejected', 'completed', 'cancelled'}
+    if payload.status not in allowed:
+        raise HTTPException(status_code=400, detail='Invalid status')
+    br.status = payload.status
+    db.add(br)
+    db.commit()
+    db.refresh(br)
+    try:
+        br.requester_username = br.requester.username if getattr(br, 'requester', None) else None
+        br.owner_username = br.owner.username if getattr(br, 'owner', None) else None
+        br.book_title = br.book.title if getattr(br, 'book', None) else None
+        br.book_image_url = getattr(br.book, 'image_url', None) if getattr(br, 'book', None) else None
+    except Exception:
+        pass
+
+    # notify requester on approve/complete/reject
+    try:
+        if payload.status == 'approved':
+            subject = f"Your borrow request approved: {br.book.title if getattr(br,'book',None) else ''}"
+            body = f"Your request to borrow '{br.book.title}' was approved by {br.owner.username if getattr(br,'owner',None) else ''}."
+            send_email(br.requester.email or '', subject, body)
+        elif payload.status in ('rejected', 'cancelled'):
+            subject = f"Your borrow request {payload.status}: {br.book.title if getattr(br,'book',None) else ''}"
+            body = f"Your request to borrow '{br.book.title}' was {payload.status} by {br.owner.username if getattr(br,'owner',None) else ''}."
+            send_email(br.requester.email or '', subject, body)
+        elif payload.status == 'completed':
+            subject = f"Borrow completed: {br.book.title if getattr(br,'book',None) else ''}"
+            body = f"The borrow for '{br.book.title}' was marked completed by {br.owner.username if getattr(br,'owner',None) else ''}."
+            send_email(br.requester.email or '', subject, body)
+    except Exception:
+        pass
+
+    return br
