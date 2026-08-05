@@ -129,7 +129,7 @@ def list_borrowed_books(status: Optional[str] = None, db: Session = Depends(get_
 
     Optional query param `status` can filter by borrow request status (e.g. pending, approved).
     """
-    st = status or 'approved'
+    st = status or 'completed'
     q = db.query(BookModel).join(BorrowModel, BorrowModel.book_id == BookModel.id).filter(BorrowModel.requester_id == current_user.id, BorrowModel.status == st)
     books = q.options(joinedload(BookModel.owner)).all()
 

@@ -10,8 +10,8 @@ router = APIRouter(prefix="/api/users", tags=["users"])
 
 @router.get("", response_model=List[UserOut])
 @router.get("/", response_model=List[UserOut])
-def list_users(db: Session = Depends(get_db)):
-    return db.query(UserModel).all()
+def list_users(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    return db.query(UserModel).filter(UserModel.id != current_user.id).all()
 
 
 @router.get("/me", response_model=UserOut)
