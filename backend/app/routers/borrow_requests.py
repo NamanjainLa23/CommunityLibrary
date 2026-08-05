@@ -110,9 +110,11 @@ def update_request_status(req_id: int, payload: borrow_schemas.BorrowRequestUpda
 
     transitions = {
         'pending': {'approved', 'rejected'},
-        'approved': {'completed', 'rejected'},
+        # allow owner to mark approved borrows as completed or as received back
+        'approved': {'completed', 'rejected', 'received'},
         'completed': set(),
         'rejected': set(),
+        'received': set(),
     }
 
     allowed_next = transitions.get(br.status, set())
@@ -121,6 +123,19 @@ def update_request_status(req_id: int, payload: borrow_schemas.BorrowRequestUpda
         raise HTTPException(status_code=400, detail=f"cannot transition from {br.status} to {payload.status}")
         
     br.status = payload.status
+
+    # if owner marks the book as received back, restore book visibility/ownership as needed
+    if payload.status == 'received':
+        try:
+            book = br.book
+            if book:
+                # ensure owner remains the owner and make the book public again
+                book.owner_id = br.owner_id
+                book.is_public = True
+                db.add(book)
+        except Exception:
+            pass
+
     db.add(br)
     db.commit()
     db.refresh(br)
@@ -145,6 +160,10 @@ def update_request_status(req_id: int, payload: borrow_schemas.BorrowRequestUpda
         elif payload.status == 'completed':
             subject = f"Borrow completed: {br.book.title if getattr(br,'book',None) else ''}"
             body = f"The borrow for '{br.book.title}' was marked completed by {br.owner.username if getattr(br,'owner',None) else ''}."
+            send_email(br.requester.email or '', subject, body)
+        elif payload.status == 'received':
+            subject = f"Book received back: {br.book.title if getattr(br,'book',None) else ''}"
+            body = f"{br.owner.username if getattr(br,'owner',None) else ''} marked the book '{br.book.title}' as received back."
             send_email(br.requester.email or '', subject, body)
     except Exception:
         pass
