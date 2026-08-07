@@ -4,7 +4,6 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db import Base
 import uuid
-from app.models.community import user_communities
 
 class User(Base):
     __tablename__ = "users"
@@ -22,4 +21,7 @@ class User(Base):
     books = relationship("Book", back_populates="owner")
     borrow_requests = relationship("BorrowRequest", back_populates="requester", foreign_keys="BorrowRequest.requester_id")
     owned_borrow_requests = relationship("BorrowRequest", back_populates="owner", foreign_keys="BorrowRequest.owner_id")
+
+    # communities: many-to-many with Community
+    from app.models.community import user_communities
     communities = relationship("Community", secondary=user_communities, back_populates="members")

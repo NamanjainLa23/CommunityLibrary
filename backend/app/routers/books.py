@@ -9,6 +9,10 @@ from app.schemas.book import BookFromISBN
 from app.core.security import get_current_user
 from app.models.book import Book as BookModel
 from app.models.user import User as UserModel
+from app.models.community import Community as CommunityModel
+import jwt
+from app.core.security import SECRET_KEY, ALGORITHM
+from fastapi import Request
 from app.core.isbn import fetch_book_by_isbn
 from uuid import UUID
 from app.models.borrow import BorrowRequest as BorrowModel
@@ -77,7 +81,7 @@ def list_my_books(db: Session = Depends(get_db), current_user = Depends(get_curr
     return (db.query(BookModel).filter(BookModel.owner_id == current_user.id,~BookModel.id.in_(lent_book_ids),).all())
 
 @router.get("/public", response_model=List[book_schemas.BookOut])
-def list_public_books(owner_id: Optional[UUID] = None, owner_username: Optional[str] = None, db: Session = Depends(get_db)):
+def list_public_books(request: Request, owner_id: Optional[UUID] = None, owner_username: Optional[str] = None, db: Session = Depends(get_db)):
     q = db.query(BookModel).filter(BookModel.is_public == True)
     if owner_id:
         q = q.filter(BookModel.owner_id == owner_id)
@@ -85,7 +89,32 @@ def list_public_books(owner_id: Optional[UUID] = None, owner_username: Optional[
         user = db.query(UserModel).filter((UserModel.username == owner_username) | (UserModel.mobile == owner_username)).first()
         if not user:
             return []
+
+    # if request has an Authorization header, restrict visible books to users in the same communities
+    auth = request.headers.get('authorization')
+    current_user = None
+    if auth and auth.lower().startswith('bearer '):
+        token = auth.split(None, 1)[1]
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            mobile = payload.get('sub')
+            if mobile:
+                current_user = db.query(UserModel).filter(UserModel.mobile == mobile).first()
+        except Exception:
+            current_user = None
+
     books = q.options(joinedload(BookModel.owner)).all()
+
+    if current_user:
+        # build set of allowed owner ids from communities
+        allowed = set()
+        try:
+            for c in current_user.communities:
+                for m in c.members:
+                    allowed.add(m.id)
+        except Exception:
+            allowed = set()
+        books = [b for b in books if b.owner_id in allowed]
 
     for b in books:
         try:
