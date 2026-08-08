@@ -1,11 +1,15 @@
+from re import L
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.db import get_db
 from app.models.community import Community as CommunityModel, user_communities
 from app.models.user import User as UserModel
-from app.schemas.community import CommunityCreate, CommunityOut
+from app.models.book import Book as BookModel
+from app.schemas.community import CommunityCreate, CommunityOut, CommunityDetail, OwnerBooks
+from app.schemas.book import BookOut
 from app.core.security import get_current_user
+from uuid import UUID
 
 router = APIRouter(prefix="/api/communities", tags=["communities"])
 
@@ -27,8 +31,49 @@ def list_communities(db: Session = Depends(get_db)):
     return db.query(CommunityModel).all()
 
 
+@router.get("/me", response_model=List[CommunityOut])
+def my_communities(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    try:
+        return current_user.communities
+    except Exception:
+        return []
+
+
+@router.get("/{community_id}", response_model=CommunityDetail)
+def get_community(community_id: UUID, db: Session = Depends(get_db)):
+    c = db.query(CommunityModel).filter(CommunityModel.id == community_id).first()
+    if not c:
+        raise HTTPException(status_code=404, detail="Community not found")
+
+    return c
+
+
+@router.get("/{community_id}/books", response_model=List[OwnerBooks])
+def community_books(community_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    c = db.query(CommunityModel).filter(CommunityModel.id == community_id).first()
+    if not c:
+        raise HTTPException(status_code=404, detail="Community not found")
+
+    result = []
+    for member in c.members:
+        if current_user and member.id == current_user.id:
+            continue
+
+        books = db.query(BookModel).filter(BookModel.owner_id == member.id, BookModel.is_public == True).all()
+        if books:
+            for b in books:
+                try:
+                    b.owner_username = member.username
+                except Exception:
+                    pass
+            
+            result.append({"owner": member, "books": books})
+
+    return result
+
+
 @router.post("/{community_id}/join")
-def join_community(community_id: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def join_community(community_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     c = db.query(CommunityModel).filter(CommunityModel.id == community_id).first()
     if not c:
         raise HTTPException(status_code=404, detail="Community not found")
@@ -41,7 +86,7 @@ def join_community(community_id: str, db: Session = Depends(get_db), current_use
 
 
 @router.post("/{community_id}/leave")
-def leave_community(community_id: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def leave_community(community_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     c = db.query(CommunityModel).filter(CommunityModel.id == community_id).first()
     if not c:
         raise HTTPException(status_code=404, detail="Community not found")
@@ -50,11 +95,3 @@ def leave_community(community_id: str, db: Session = Depends(get_db), current_us
         db.add(c)
         db.commit()
     return {"status": "left"}
-
-
-@router.get("/me", response_model=List[CommunityOut])
-def my_communities(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    try:
-        return current_user.communities
-    except Exception:
-        return []

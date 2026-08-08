@@ -1,6 +1,9 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
+
+from app.schemas.user import UserOut
+from app.schemas.book import BookOut
 
 
 class CommunityCreate(BaseModel):
@@ -10,6 +13,19 @@ class CommunityCreate(BaseModel):
 class CommunityOut(BaseModel):
     id: UUID
     name: str
+
+    class Config:
+        orm_mode = True
+
+class CommunityDetail(CommunityOut):
+    members: List[UserOut] = []
+    
+    class Config:
+        orm_mode = True
+
+class OwnerBooks(BaseModel):
+    owner: UserOut
+    books: List[BookOut]
 
     class Config:
         orm_mode = True
