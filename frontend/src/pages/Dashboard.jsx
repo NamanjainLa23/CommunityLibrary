@@ -20,7 +20,7 @@ const TABS = [
 ];
 
 export default function Dashboard() {
-  const [tab, setTab] = useState("my");
+  const [tab, setTab] = useState("nearby");
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
