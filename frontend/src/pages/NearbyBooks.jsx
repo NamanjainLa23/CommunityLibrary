@@ -16,41 +16,41 @@ export default function NearbyBooks(){
   useEffect(()=>{
     const load = async ()=>{
       setErr("");
+      let meId = null;
+
+      try {
+        const me = await api.get("/users/me");
+        meId = me.data?.id ?? null;
+        setCurrentUserId(meId);
+      } catch (_) {}
+
       try{
         const res = await api.get('/communities/me');
-        setCommunities(res.data || []);
+        const list = res.data || [];
+        setCommunities(list);
+
+        if (list.length > 0){
+          await showCommunity(list[0], meId);
+        }
       }catch(e){
         setErr('Failed to load your communities');
-      }
-      try{
-        const me = await api.get('/users/me');
-        setCurrentUserId(me.data && me.data.id ? me.data.id : null);
-      }catch(_){
-        //ignore
       }
     };
     load();
   },[]);
 
-  const showCommunity = async (c) => {
+  const showCommunity = async (c, meId = currentUserId) => {
     setErr("");
     setSelectedCommunity(c);
     setSelectedOwner(null);
     setBooksByOwner([]);
 
-    try{
-      const res = await api.get(`/communities/${encodeURIComponent(c.id)}`);
-      const members = res.data.members || [];
-
-      const otherMembers = members.filter(m => m.id !== currentUserId);
-      const bookPromises = otherMembers.map(async (m) => {
-        const br = await api.get(`/books/public?owner_id=${m.id}`);
-        return {owner: m, books: br.data || []}
-      });
-      const books = await Promise.all(bookPromises);
-      setBooksByOwner(books.filter(r=> (r.books || []).length > 0));
-    }catch(e){
-      setErr('Failed to load community books');
+    try {
+      // Simpler: use the books endpoint you already have
+      const res = await api.get(`/communities/${encodeURIComponent(c.id)}/books`);
+      setBooksByOwner(res.data || []);
+    } catch (e) {
+      setErr("Failed to load community books");
     }
   };
 

@@ -8,19 +8,23 @@ export default function Communities(){
 
   const load = async ()=>{
     setErr("");
+    let mine = [];
+    let all = [];
+
     try{
       const res = await api.get('/communities/me');
-      setMy(res.data || []);
+      mine = res.data || [];
+      setMy(mine);
     }catch(e){
       setMy([]);
     }
     try{
-      const res2 = await api.get('/communities');
+      const res2 = await api.get('/communities/available');
       setAvailable(res2.data || []);
     }catch(e){
       setAvailable([]);
     }
-  }
+  };
 
   useEffect(()=>{ load(); }, []);
 

@@ -39,6 +39,16 @@ def my_communities(db: Session = Depends(get_db), current_user = Depends(get_cur
         return []
 
 
+@router.get("/available", response_model=List[CommunityOut])
+def available_communities(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    my_ids = [c.id for c in current_user.communities]
+    q = db.query(CommunityModel)
+    if my_ids:
+        q = q.filter(~CommunityModel.id.in_(my_ids))
+
+    return q.all()
+    
+
 @router.get("/{community_id}", response_model=CommunityDetail)
 def get_community(community_id: UUID, db: Session = Depends(get_db)):
     c = db.query(CommunityModel).filter(CommunityModel.id == community_id).first()
