@@ -8,11 +8,13 @@ import NearbyBooks from "./NearbyBooks";
 import BorrowedBooks from "./BorrowedBooks";
 import Requests from "./Requests";
 import LentBooks from "./LentBooks";
+import Communities from "./Communities";
 
 const TABS = [
   { key: "my", label: "My Books" },
   { key: "borrowed", label: "Borrowed" },
   { key: "nearby", label: "Nearby Books" },
+  { key: "communities", label: "Communities" },
   { key: "requests", label: "Requests" },
   { key: "lent", label: "Lent" },
   { key: "book", label: "Search Book" },
@@ -63,6 +65,7 @@ export default function Dashboard() {
             {tab === 'my' && <MyBooks />}
             {tab === 'borrowed' && <BorrowedBooks />}
             {tab === 'nearby' && <NearbyBooks />}
+            {tab === 'communities' && <Communities />}
             {tab === 'requests' && <Requests />}
             {tab === 'lent' && <LentBooks />}
             {tab === 'book' && <Search />}
