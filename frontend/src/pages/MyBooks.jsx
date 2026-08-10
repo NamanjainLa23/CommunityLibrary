@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import { formatIsbn } from "../utils/isbn";
 
 export default function MyBooks() {
   const [books, setBooks] = useState([]);
@@ -54,7 +55,7 @@ export default function MyBooks() {
               <div className="min-w-0 flex-1">
                 <div className="font-medium break-words">{b.title}</div>
                 <div className="text-sm text-gray-600 break-words">{b.author}</div>
-                <div className="text-xs text-gray-500 break-all">ISBN: {b.isbn}</div>
+                <div className="text-xs text-gray-500 break-all">ISBN: {formatIsbn(b.isbn)}</div>
               </div>
             </div>
             <div className="flex flex-row sm:flex-col gap-3 sm:gap-2 sm:text-right shrink-0">
