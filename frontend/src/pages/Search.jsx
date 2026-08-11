@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Fuse from "fuse.js";
+import { formatIsbn } from "../utils/isbn";
 
 export default function Search() {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export default function Search() {
             <div className="flex-1">
               <div className="font-medium">{b.title}</div>
               <div className="text-sm text-gray-600">{b.author}</div>
-              <div className="text-xs text-gray-500">ISBN: {b.isbn} — Owner ID: {b.owner_id}</div>
+              <div className="text-xs text-gray-500">ISBN: {formatIsbn(b.isbn)} — Owner ID: {b.owner_id}</div>
             </div>
             <div className="flex flex-col gap-2">
               <button onClick={async ()=>{

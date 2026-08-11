@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { formatIsbn } from "../utils/isbn";
 
 export default function NearbyBooks(){
   const navigate = useNavigate();
@@ -117,7 +118,7 @@ export default function NearbyBooks(){
                     <div>
                       <div className="font-medium">{b.title}</div>
                       <div className="text-sm text-gray-600">{b.author}</div>
-                      <div className="text-xs text-gray-500">ISBN: {b.isbn} — Qty: {b.quantity}</div>
+                      <div className="text-xs text-gray-500">ISBN: {formatIsbn(b.isbn)} — Qty: {b.quantity}</div>
                     </div>
                     <div className="ml-auto flex flex-col gap-2">
                       <button onClick={async ()=>{
