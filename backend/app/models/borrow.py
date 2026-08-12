@@ -3,7 +3,6 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db import Base
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
 
 
 class BorrowRequest(Base):
