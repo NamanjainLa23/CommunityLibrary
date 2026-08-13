@@ -9,7 +9,6 @@ from app.schemas.book import BookFromISBN
 from app.core.security import get_current_user
 from app.models.book import Book as BookModel
 from app.models.user import User as UserModel
-from app.models.community import Community as CommunityModel
 import jwt
 from app.core.security import SECRET_KEY, ALGORITHM
 from fastapi import Request
