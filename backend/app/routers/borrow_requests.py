@@ -11,8 +11,6 @@ from app.core.email import send_email
 
 router = APIRouter(prefix="/api/borrow_requests", tags=["borrow_requests"])
 
-
-@router.post("", response_model=borrow_schemas.BorrowRequestOut, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=borrow_schemas.BorrowRequestOut, status_code=status.HTTP_201_CREATED)
 def create_request(payload: borrow_schemas.BorrowRequestCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     # validate book
@@ -33,6 +31,12 @@ def create_request(payload: borrow_schemas.BorrowRequestCreate, db: Session = De
         status='pending',
         message=payload.message,
     )
+
+    # check if requester has already a pending request for this book
+    existing_request = db.query(BorrowModel).filter(BorrowModel.requester_id == current_user.id, BorrowModel.book_id == book.id, BorrowModel.status == 'pending').first()
+    if existing_request:
+        raise HTTPException(status_code=400, detail="You already have a pending request for this book")
+
     db.add(br)
     db.commit()
     db.refresh(br)
