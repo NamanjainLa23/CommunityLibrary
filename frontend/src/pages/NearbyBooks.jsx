@@ -12,6 +12,7 @@ export default function NearbyBooks(){
   const [selectedOwner, setSelectedOwner] = useState(null);
   const [availableCommunities, setAvailableCommunities] = useState([]);
   const [showAvailable, setShowAvailable] = useState(false);
+  const [requestedBookIds, setRequestedBookIds] = useState(new Set());
   const [err, setErr] = useState("");
 
   useEffect(()=>{
@@ -52,6 +53,17 @@ export default function NearbyBooks(){
       setBooksByOwner(res.data || []);
     } catch (e) {
       setErr("Failed to load community books");
+    }
+    try{
+      const mine = await api.get('/borrow_requests/me');
+      const ids = new Set(
+        (mine.data || [])
+        .filter((r) => ["pending", "approved"].includes(r.status))
+        .map((r) => String(r.book_id))
+      );
+      setRequestedBookIds(ids);
+    }catch(e){
+      setErr('Failed to load your borrow requests');
     }
   };
 
@@ -121,16 +133,29 @@ export default function NearbyBooks(){
                       <div className="text-xs text-gray-500">ISBN: {formatIsbn(b.isbn)} — Qty: {b.quantity}</div>
                     </div>
                     <div className="ml-auto flex flex-col gap-2">
-                      <button onClick={async ()=>{
-                        if(!localStorage.getItem('booklender_token')){ navigate('/login'); return; }
-                        if(!confirm('Request to borrow this book?')) return;
-                        try{
-                          await api.post('/borrow_requests', { book_id: b.id, message: '' });
-                          alert('Borrow request sent');
-                        }catch(e){
-                          alert('Failed to send request');
-                        }
-                      }} className="bg-indigo-600 text-white px-3 py-1 rounded">Request Borrow</button>
+                      {requestedBookIds.has(String(b.id)) ? (
+                        <button disabled className="bg-gray-200 text-gray-600 px-3 py-1 rounded cursor-not-allowed">Borrow requested</button>
+                      ) : (
+                        <button
+                          onClick={async () => {
+                            if (!localStorage.getItem("booklender_token")) {
+                              navigate("/login");
+                              return;
+                            }
+                            if (!confirm("Request to borrow this book?")) return;
+                            try {
+                              await api.post("/borrow_requests/", { book_id: b.id, message: "" });
+                              alert('Borrow request sent');
+                              setRequestedBookIds((prev) => new Set([...prev, String(b.id)]));
+                            } catch (e) {
+                              alert(e?.response?.data?.detail || "Failed to send request");
+                            }
+                          }}
+                          className="bg-indigo-600 text-white px-3 py-1 rounded"
+                        >
+                          Request Borrow
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

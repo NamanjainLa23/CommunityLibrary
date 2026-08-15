@@ -43,8 +43,8 @@ def create_request(payload: borrow_schemas.BorrowRequestCreate, db: Session = De
 
     # send email to owner (best-effort)
     subject = f"Borrow request: {book.title}"
-    body = f"User {current_user.username or current_user.mobile} (id={current_user.id}) requests to borrow your book '{book.title}'.\n\nMessage:\n{payload.message or ''}\n\nVisit the app to respond."
-    send_email(owner.email or owner.mobile or '','Borrow request', body)
+    body = f"User {current_user.first_name} {current_user.last_name} requests to borrow your book '{book.title}'.\n\nMessage:\n{payload.message or ''}\n\nVisit the app to respond."
+    send_email(owner.email or owner.mobile or '',subject, body)
 
     # attach extra fields for response
     try:

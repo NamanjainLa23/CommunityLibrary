@@ -76,8 +76,8 @@ def create_book_from_isbn(payload: BookFromISBN, db: Session = Depends(get_db), 
 
 @router.get("/me", response_model=List[book_schemas.BookOut])
 def list_my_books(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    lent_book_ids = db.query(BorrowModel.book_id).filter(BorrowModel.owner_id == current_user.id, BorrowModel.status == "completed").subquery()
-    return (db.query(BookModel).filter(BookModel.owner_id == current_user.id,~BookModel.id.in_(lent_book_ids),).all())
+    lent_book_ids = db.query(BorrowModel.book_id).filter(BorrowModel.owner_id == current_user.id, BorrowModel.status == "completed")
+    return (db.query(BookModel).filter(BookModel.owner_id == current_user.id, ~BookModel.id.in_(lent_book_ids),).all())
 
 @router.get("/public", response_model=List[book_schemas.BookOut])
 def list_public_books(request: Request, owner_id: Optional[UUID] = None, owner_username: Optional[str] = None, db: Session = Depends(get_db)):

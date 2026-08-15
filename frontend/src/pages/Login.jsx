@@ -6,6 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 export default function Login() {
   const [form, setForm] = useState({ mobile: "", password: "" });
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const submit = async (e) => {
@@ -27,7 +28,23 @@ export default function Login() {
         {error && <div className="mb-3 text-sm text-red-600">{error}</div>}
         <form onSubmit={submit} className="space-y-3">
           <input className="w-full p-2 border rounded" placeholder="Mobile" value={form.mobile} onChange={e=>setForm({...form, mobile:e.target.value})} required />
-          <input className="w-full p-2 border rounded" placeholder="Password" type="password" value={form.password} onChange={e=>setForm({...form, password:e.target.value})} required />
+          <div className="relative">
+            <input
+              className="w-full p-2 pr-16 border rounded"
+              placeholder="Password"
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-indigo-600"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
           <button className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Login</button>
         </form>
         <p className="mt-4 text-center text-sm">

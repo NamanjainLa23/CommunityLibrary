@@ -10,24 +10,38 @@ export default function Search() {
   const [results, setResults] = useState([]);
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
+  const [requestedBookIds, setRequestedBookIds] = useState(new Set());
 
   const runSearch = async () => {
     if (!q) return;
-    setLoading(true); setInfo(""); setResults([]);
+    setLoading(true); 
+    setInfo(""); 
+    setResults([]);
     try {
-      // Preferred: server-side search
       const res = await api.get(`/books/search?query=${encodeURIComponent(q)}`);
+      let books = [];
       if (res.status === 200 && res.data.length) {
-        setResults(res.data);
-        setLoading(false);
-        return;
+        books = res.data;
+      } 
+      else {
+        // fallback to fetching all public books and fuzzy search client-side
+        const pub = await api.get("/books/public");
+        const fuse = new Fuse(pub.data, { keys: ["title", "author", "isbn"], threshold: 0.4 });
+        books = fuse.search(q).map(x=>x.item);
+        if (books.length===0) setInfo("No results");
       }
-      // fallback to fetching all public books and fuzzy search client-side
-      const pub = await api.get("/books/public");
-      const fuse = new Fuse(pub.data, { keys: ["title", "author", "isbn"], threshold: 0.4 });
-      const r = fuse.search(q).map(x=>x.item);
-      setResults(r);
-      if (r.length===0) setInfo("No results");
+      setResults(books);
+      
+      try {
+        const mine = await api.get("/borrow_requests/me");
+        const ids = new Set(
+          (mine.data || [])
+            .filter((r) => ["pending", "approved"].includes(r.status))
+            .map((r) => String(r.book_id))
+        );
+        setRequestedBookIds(ids);
+      } catch (_) {}
+
     } catch (e) {
       setInfo("Search failed");
     } finally {
@@ -53,16 +67,29 @@ export default function Search() {
               <div className="text-xs text-gray-500">ISBN: {formatIsbn(b.isbn)} — Owner ID: {b.owner_id}</div>
             </div>
             <div className="flex flex-col gap-2">
-              <button onClick={async ()=>{
-                if(!localStorage.getItem('booklender_token')){ navigate('/login'); return; }
-                if(!confirm('Request to borrow this book?')) return;
-                try{
-                  await api.post('/borrow_requests', { book_id: b.id, message: '' });
-                  alert('Borrow request sent');
-                }catch(e){
-                  alert('Failed to send request');
-                }
-              }} className="bg-indigo-600 text-white px-3 py-1 rounded">Request Borrow</button>
+            {requestedBookIds.has(String(b.id)) ? (
+              <button disabled className="bg-gray-200 text-gray-600 px-3 py-1 rounded cursor-not-allowed">Borrow requested</button>
+            ) : (
+              <button
+                onClick={async () => {
+                  if (!localStorage.getItem("booklender_token")) {
+                    navigate("/login");
+                    return;
+                  }
+                  if (!confirm("Request to borrow this book?")) return;
+                  try {
+                    await api.post("/borrow_requests/", { book_id: b.id, message: "" });
+                    alert('Borrow request sent');
+                    setRequestedBookIds((prev) => new Set([...prev, String(b.id)]));
+                  } catch (e) {
+                    alert(e?.response?.data?.detail || "Failed to send request");
+                  }
+                }}
+                className="bg-indigo-600 text-white px-3 py-1 rounded"
+              >
+                Request Borrow
+              </button>
+            )}
             </div>
           </div>
         ))}
