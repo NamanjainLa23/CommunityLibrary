@@ -29,3 +29,5 @@ SMTP - google app, email id and password
 ToDo
 Return Request
 borrow request reverted after 15 days
+barcode scanner for isbn
+automated app like login/logout from browser

@@ -8,14 +8,14 @@ from app.models.user import User as UserModel
 from app.models.book import Book as BookModel
 from app.schemas.community import CommunityCreate, CommunityOut, CommunityDetail, OwnerBooks
 from app.schemas.book import BookOut
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_admin
 from uuid import UUID
 
 router = APIRouter(prefix="/api/communities", tags=["communities"])
 
 
 @router.post("", response_model=CommunityOut)
-def create_community(payload: CommunityCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def create_community(payload: CommunityCreate, db: Session = Depends(get_db), current_user = Depends(require_admin)):
     existing = db.query(CommunityModel).filter(CommunityModel.name == payload.name).first()
     if existing:
         raise HTTPException(status_code=400, detail="Community already exists")

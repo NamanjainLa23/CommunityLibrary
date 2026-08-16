@@ -17,6 +17,7 @@ class User(Base):
     mobile = Column(String, unique=True, nullable=True, index=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    is_admin = Column(Boolean, default=False, nullable=False)
 
     books = relationship("Book", back_populates="owner")
     borrow_requests = relationship("BorrowRequest", back_populates="requester", foreign_keys="BorrowRequest.requester_id")

@@ -17,6 +17,7 @@ class UserOut(UserBase):
     id: UUID
     is_active: bool
     created_at: Optional[datetime]
+    is_admin: bool = False
 
     class Config:
         orm_mode = True
