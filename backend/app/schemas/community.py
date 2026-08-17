@@ -29,3 +29,17 @@ class OwnerBooks(BaseModel):
 
     class Config:
         orm_mode = True
+
+class JoinRequestUpdate(BaseModel):
+    status: str  # "approved" | "rejected"
+
+    
+class JoinRequestOut(BaseModel):
+    id: int
+    user_id: UUID
+    community_id: UUID
+    status: str
+    username: Optional[str] = None
+    email: Optional[str] = None
+    class Config:
+        orm_mode = True
