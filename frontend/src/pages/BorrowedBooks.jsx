@@ -27,6 +27,17 @@ export default function BorrowedBooks() {
         {items.length===0 && <div className="text-sm text-gray-600">No borrowed items to show.</div>}
         {items.map(it => (
           <div key={it.id} className="bg-gray-50 p-3 rounded">
+            <div className="flex gap-3 min-w-0 flex-1">
+              {it.image_url ? (
+                <img
+                  src={it.image_url}
+                  className="w-14 h-20 sm:w-16 sm:h-20 object-cover rounded shrink-0"
+                  alt="cover"
+                />
+              ) : (
+                <div className="w-14 h-20 bg-gray-100 rounded shrink-0" />
+              )}
+            </div>
             <div className="font-medium">{it.title}</div>
             <div className="text-sm text-gray-600">Borrowed from: {it.owner_username || it.owner_id}</div>
             <div className="text-xs text-gray-500">Due: {it.due_date || '—'}</div>

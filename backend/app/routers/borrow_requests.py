@@ -73,7 +73,7 @@ def my_requests(db: Session = Depends(get_db), current_user = Depends(get_curren
 
 @router.get("/received", response_model=List[borrow_schemas.BorrowRequestOut])
 def received_requests(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    items = db.query(BorrowModel).filter(BorrowModel.owner_id == current_user.id).all()
+    items = db.query(BorrowModel).filter(BorrowModel.owner_id == current_user.id).filter(BorrowModel.status != 'completed' or BorrowModel.status != 'returned').all()
     for it in items:
         try:
             it.requester_username = it.requester.username if getattr(it, 'requester', None) else None

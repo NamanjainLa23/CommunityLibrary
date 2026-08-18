@@ -9,7 +9,7 @@ export default function LentBooks(){
     setErr("");
     try{
       // show currently approved lends (items currently out)
-      const res = await api.get("/borrow_requests/lent?status=approved");
+      const res = await api.get("/borrow_requests/lent?status=completed");
       setItems(res.data || []);
     }catch(e){
       setErr('Failed to load lent items');
@@ -43,6 +43,15 @@ export default function LentBooks(){
         {items.map(r=> (
           <div key={r.id} className="bg-white p-3 rounded shadow flex gap-3 items-start">
             <div className="flex-1">
+            {r.book_image_url ? (
+                <img
+                  src={r.book_image_url}
+                  className="w-14 h-20 sm:w-16 sm:h-20 object-cover rounded shrink-0"
+                  alt="cover"
+                />
+              ) : (
+                <div className="w-14 h-20 bg-gray-100 rounded shrink-0" />
+              )}
               <div className="font-medium">{r.book_title || 'book'}</div>
               <div className="text-sm text-gray-600">Borrowed by: {r.requester_username || r.requester_id}</div>
               <div className="text-xs text-gray-500">Status: {r.status}</div>
