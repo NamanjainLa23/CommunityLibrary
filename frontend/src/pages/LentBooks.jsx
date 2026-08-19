@@ -9,7 +9,7 @@ export default function LentBooks(){
     setErr("");
     try{
       // show currently approved lends (items currently out)
-      const res = await api.get("/borrow_requests/lent?status=completed");
+      const res = await api.get("/borrow_requests/lent");
       setItems(res.data || []);
     }catch(e){
       setErr('Failed to load lent items');
@@ -26,10 +26,10 @@ export default function LentBooks(){
     }catch(e){ alert('Failed to update'); }
   };
 
-  const markReceived = async (id) => {
+  const markReturned = async (id) => {
     if(!confirm('Confirm you have received the book back?')) return;
     try{
-      await api.patch(`/borrow_requests/${id}/status`, { status: 'received' });
+      await api.patch(`/borrow_requests/${id}/status`, { status: 'returned' });
       load();
     }catch(e){ alert('Failed to update'); }
   };
@@ -41,7 +41,11 @@ export default function LentBooks(){
       <div className="space-y-3">
         {items.length===0 && <div className="text-sm text-gray-600">No lent items.</div>}
         {items.map(r=> (
-          <div key={r.id} className="bg-white p-3 rounded shadow flex gap-3 items-start">
+          <div 
+            key={r.id} 
+            className={`p-3 rounded shadow flex gap-3 items-start ${
+              r.status === "returned" ? "bg-green-50 border border-green-200" : "bg-white"
+            }`}>
             <div className="flex-1">
             {r.book_image_url ? (
                 <img
@@ -55,9 +59,9 @@ export default function LentBooks(){
               <div className="font-medium">{r.book_title || 'book'}</div>
               <div className="text-sm text-gray-600">Borrowed by: {r.requester_username || r.requester_id}</div>
               <div className="text-xs text-gray-500">Status: {r.status}</div>
-            </div>
-            <div className="flex flex-col gap-2">
-              {r.status === 'approved' && <button onClick={()=>markReceived(r.id)} className="bg-green-600 text-white px-3 py-1 rounded">Book Received</button>}
+              {r.status === "completed" && (
+                <button onClick={() => markReturned(r.id)} className="bg-green-600 text-white px-3 py-1 rounded"> Returned Received </button>
+              )}
             </div>
           </div>
         ))}
