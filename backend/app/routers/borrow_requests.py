@@ -91,6 +91,8 @@ def lent_items(status: str | None = "completed", db: Session = Depends(get_db), 
     q = db.query(BorrowModel).filter(BorrowModel.owner_id == current_user.id)
     if status:
         q = q.filter(BorrowModel.status == status)
+    else:
+        q = q.filter(BorrowModel.status.in_ == (["completed", "returned"]))
     items = q.all()
     for it in items:
         try:
@@ -116,7 +118,7 @@ def update_request_status(req_id: int, payload: borrow_schemas.BorrowRequestUpda
         'pending': {'approved', 'rejected'},
         # allow owner to mark approved borrows as completed or as received back
         'approved': {'completed', 'rejected', 'received'},
-        'completed': set(),
+        'completed': {"returned"},
         'rejected': set(),
         'received': set(),
     }
@@ -129,7 +131,7 @@ def update_request_status(req_id: int, payload: borrow_schemas.BorrowRequestUpda
     br.status = payload.status
 
     # if owner marks the book as received back, restore book visibility/ownership as needed
-    if payload.status == 'received':
+    if payload.status == 'returned':
         try:
             book = br.book
             if book:
