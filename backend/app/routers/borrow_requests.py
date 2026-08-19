@@ -73,7 +73,7 @@ def my_requests(db: Session = Depends(get_db), current_user = Depends(get_curren
 
 @router.get("/received", response_model=List[borrow_schemas.BorrowRequestOut])
 def received_requests(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    items = db.query(BorrowModel).filter(BorrowModel.owner_id == current_user.id).filter(BorrowModel.status != 'completed' or BorrowModel.status != 'returned').all()
+    items = db.query(BorrowModel).filter(BorrowModel.owner_id == current_user.id).filter(BorrowModel.status.in_(["pending", "approved"])).all()
     for it in items:
         try:
             it.requester_username = it.requester.username if getattr(it, 'requester', None) else None
@@ -86,13 +86,13 @@ def received_requests(db: Session = Depends(get_db), current_user = Depends(get_
 
 
 @router.get('/lent', response_model=List[borrow_schemas.BorrowRequestOut])
-def lent_items(status: str | None = "completed", db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def lent_items(status: str | None = None, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     # books lent out by current user (owner)
     q = db.query(BorrowModel).filter(BorrowModel.owner_id == current_user.id)
     if status:
         q = q.filter(BorrowModel.status == status)
     else:
-        q = q.filter(BorrowModel.status.in_ == (["completed", "returned"]))
+        q = q.filter(BorrowModel.status.in_(["completed", "returned"]))
     items = q.all()
     for it in items:
         try:
