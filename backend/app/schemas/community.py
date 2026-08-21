@@ -38,6 +38,7 @@ class JoinRequestOut(BaseModel):
     id: int
     user_id: UUID
     community_id: UUID
+    community_name: Optional[str] = None
     status: str
     username: Optional[str] = None
     email: Optional[str] = None

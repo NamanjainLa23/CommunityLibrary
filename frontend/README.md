@@ -27,6 +27,7 @@ Requirements
 SMTP - google app, email id and password
 
 ToDo
+Admin approve/reject request 
 Return Request
 borrow request reverted after 15 days
 barcode scanner for isbn
