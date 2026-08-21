@@ -58,6 +58,26 @@ def available_communities(db: Session = Depends(get_db), current_user=Depends(ge
     return q.all()
     
 
+@router.get("/join-requests", response_model=List[JoinRequestOut])
+def all_join_requests(db: Session = Depends(get_db), current_user=Depends(require_admin)):
+    rows = db.query(CommunityJoinRequest).filter(CommunityJoinRequest.status == "pending").all()
+    result = []
+
+    for req in rows:
+        user = db.query(UserModel).filter(UserModel.id == req.user_id).first()
+        community = db.query(CommunityModel).filter(CommunityModel.id == req.community_id).first()
+        result.append({
+            "id": req.id,
+            "user_id": req.user_id,
+            "community_id": req.community_id,
+            "community_name": community.name if community else None,
+            "status": req.status,
+            "username": user.username if user else None,
+            "email": user.email if user else None,
+        })
+    return result
+
+
 @router.get("/{community_id}", response_model=CommunityDetail)
 def get_community(community_id: UUID, db: Session = Depends(get_db)):
     c = db.query(CommunityModel).filter(CommunityModel.id == community_id).first()
