@@ -130,7 +130,7 @@ def list_join_requests(community_id: UUID, db: Session = Depends(get_db), curren
     return result
 
 @router.patch("/{community_id}/join-requests/{req_id}")
-def decide_join(community_id: UUID, req_id: UUID, payload: JoinRequestUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def decide_join(community_id: UUID, req_id: int, payload: JoinRequestUpdate, db: Session = Depends(get_db), current_user = Depends(require_admin)):
     # only community admin
     c = db.query(CommunityModel).filter(CommunityModel.id == community_id).first()
     if not c:
