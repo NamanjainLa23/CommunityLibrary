@@ -10,6 +10,7 @@ import Requests from "./Requests";
 import LentBooks from "./LentBooks";
 import Communities from "./Communities";
 import AdminJoinRequests from "./AdminJoinRequests";
+import api from "../services/api";
 
 
 const TABS = [
@@ -31,10 +32,9 @@ export default function Dashboard() {
   useEffect(() => {
     loadToken();
     // setUser({ loggedIn: !!localStorage.getItem("booklender_token") });
-    api.get("/user/me").then((res) => {
-      setUser(res.data)
-      .catch(() => setUser(null));
-    });
+    api.get("/users/me")
+    .then((res) => setUser(res.data))
+    .catch(() => setUser(null));;
   }, []);
 
   const tabs = [
@@ -70,7 +70,7 @@ export default function Dashboard() {
           {/* Tabs: horizontal scroll instead of wrapping off-screen */}
           <div className="border-b mb-4 -mx-3 px-3 sm:mx-0 sm:px-0">
             <nav className="flex gap-1 overflow-x-auto whitespace-nowrap pb-px scrollbar-thin">
-              {TABS.map((t) => (
+              {tabs.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
