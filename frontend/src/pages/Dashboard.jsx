@@ -9,6 +9,8 @@ import BorrowedBooks from "./BorrowedBooks";
 import Requests from "./Requests";
 import LentBooks from "./LentBooks";
 import Communities from "./Communities";
+import AdminJoinRequests from "./AdminJoinRequests";
+
 
 const TABS = [
   { key: "my", label: "My Books" },
@@ -28,8 +30,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadToken();
-    setUser({ loggedIn: !!localStorage.getItem("booklender_token") });
+    // setUser({ loggedIn: !!localStorage.getItem("booklender_token") });
+    api.get("/user/me").then((res) => {
+      setUser(res.data)
+      .catch(() => setUser(null));
+    });
   }, []);
+
+  const tabs = [
+    ...TABS,
+    ...(user?.is_admin ? [{ key: "admin", label: "Admin" }] : []),
+  ];
 
   const logout = () => {
     clearToken();
@@ -84,6 +95,7 @@ export default function Dashboard() {
             {tab === "lent" && <LentBooks />}
             {tab === "book" && <Search />}
             {tab === "add" && <AddBook />}
+            {tab === "admin" && <AdminJoinRequests />}
           </div>
         </div>
       </div>

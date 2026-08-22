@@ -179,17 +179,17 @@ def community_books(community_id: UUID, db: Session = Depends(get_db), current_u
     return result
 
 
-@router.post("/{community_id}/join")
-def join_community(community_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    c = db.query(CommunityModel).filter(CommunityModel.id == community_id).first()
-    if not c:
-        raise HTTPException(status_code=404, detail="Community not found")
-    # attach user
-    if current_user not in c.members:
-        c.members.append(current_user)
-        db.add(c)
-        db.commit()
-    return {"status": "joined"}
+# @router.post("/{community_id}/join")
+# def join_community(community_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+#     c = db.query(CommunityModel).filter(CommunityModel.id == community_id).first()
+#     if not c:
+#         raise HTTPException(status_code=404, detail="Community not found")
+#     # attach user
+#     if current_user not in c.members:
+#         c.members.append(current_user)
+#         db.add(c)
+#         db.commit()
+#     return {"status": "joined"}
 
 
 @router.post("/{community_id}/leave")
