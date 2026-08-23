@@ -28,7 +28,7 @@ app.include_router(communities_router.router)
 # Allow the Vite dev server to call this API during development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://community-library-six.vercel.app/"],
+    allow_origins=["http://localhost:5173", "https://community-library-six.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
