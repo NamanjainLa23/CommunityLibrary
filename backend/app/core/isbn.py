@@ -1,11 +1,27 @@
 import httpx
 from typing import Optional, Dict
 import os
+import re
 
 GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes"
 GOOGLE_BOOKS_API_KEY = os.getenv("GOOGLE_BOOKS_API_KEY")
 
 OPEN_LIBRARY_URL = "https://openlibrary.org/api/books"
+
+def normalise_isbn(isbn: str | None) -> str:
+    if not isbn:
+        return ""
+    return re.sub(r"[^0-9Xx]", "", str(isbn)).upper()
+
+
+def isbn10_to_isbn13(isbn10: str | None) -> str | None:
+    if len(isbn10) != 10:
+        return None
+    
+    core = "978" + isbn10[:9]
+    total = sum(int(d) * (1 if i % 2 == 0 else 3) for i, d in enumerate(core))
+    check = (10 - (total % 10)) % 10
+    return core + str(check)
 
 
 def fetch_book_by_isbn(isbn: str) -> Optional[Dict]:
@@ -26,7 +42,7 @@ def fetch_book_by_isbn(isbn: str) -> Optional[Dict]:
         info = items[0].get("volumeInfo", {})
         title = info.get("title")
         authors = info.get("authors") or []
-        industry_ids = info.get("IndustryIdentifiers") or []
+        industry_ids = info.get("industryIdentifiers") or []
         found_isbn = isbn
 
         for ident in industry_ids:
