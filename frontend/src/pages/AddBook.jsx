@@ -9,7 +9,6 @@ export default function AddBook() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const navigate = useNavigate();
   const goToMyBooks = () => {
     if (onSuccess) onSuccess();
     else navigate("/dashboard", { state: { tab: "profile", profileSection: "books" } });
