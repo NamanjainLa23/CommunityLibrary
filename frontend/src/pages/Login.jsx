@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../services/api";
 import { saveToken } from "../services/auth";
 import { useNavigate, Link } from "react-router-dom";
@@ -7,6 +7,8 @@ export default function Login() {
   const [form, setForm] = useState({ mobile: "", password: "" });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [waking, setWaking] = useState(true);
+  const [wakeMessage, setWakeMessage] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -72,7 +74,12 @@ export default function Login() {
               {showPassword ? "Hide" : "Show"}
             </button>
           </div>
-          <button className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Login</button>
+          {wakeMessage && (
+            <div className="mb-3 text-sm text-amber-800 bg-amber-50 p-3 rounded">
+              {wakeMessage}
+            </div>
+          )}
+          <button className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700" disabled={waking}>Login{waking ? "Starting server…" : "Login"}</button>
         </form>
         <p className="mt-4 text-center text-sm">
           New here? <Link to="/signup" className="text-indigo-600">Create account</Link>
