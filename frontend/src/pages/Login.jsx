@@ -9,6 +9,33 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    let cancelled = false;
+    const wake = async () => {
+      setWaking(true);
+      setWakeMessage(
+        "The app was idle. Starting the server — this can take about 30–40 seconds."
+      );
+      for (let i = 0; i < 20 && !cancelled; i++) {
+        try {
+          await api.get("/health"); // baseURL already includes /api
+          if (!cancelled) {
+            setWaking(false);
+            setWakeMessage("");
+          }
+          return;
+        } catch {
+          await new Promise((r) => setTimeout(r, 2000));
+        }
+      }
+      if (!cancelled) {
+        setWakeMessage("Still starting. Wait a bit, then try again.");
+      }
+    };
+    wake();
+    return () => { cancelled = true; };
+  }, []);
+
   const submit = async (e) => {
     e.preventDefault();
     setError("");
