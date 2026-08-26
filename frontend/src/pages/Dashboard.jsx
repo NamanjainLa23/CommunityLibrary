@@ -103,7 +103,7 @@ export default function Dashboard() {
                 </div>
                 {profileSection === "books" && <MyBooks />}
                 {profileSection === "borrowed" && <BorrowedBooks />}
-                {profileSection === "add" && <AddBook />}
+                {profileSection === "add" && (<AddBook onSuccess={() => {setTab("profile"); setProfileSection("books");}} />)}
                 {profileSection === "admin" && user?.is_admin && <AdminJoinRequests />}
               </div>
             )}

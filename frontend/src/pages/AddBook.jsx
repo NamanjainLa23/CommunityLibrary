@@ -9,12 +9,17 @@ export default function AddBook() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const navigate = useNavigate();
+  const goToMyBooks = () => {
+    if (onSuccess) onSuccess();
+    else navigate("/dashboard", { state: { tab: "profile", profileSection: "books" } });
+
   const createManual = async (e) => {
     e.preventDefault();
     setError(""); setLoading(true);
     try {
       await api.post("/books/", manual);
-      navigate("/my-books");
+      goToMyBooks();
     } catch (err) {
       setError(err?.response?.data?.detail || "Create failed");
     } finally { setLoading(false); }
@@ -25,7 +30,7 @@ export default function AddBook() {
     try {
       const res = await api.post("/books/by-isbn", { isbn, quantity: 1, is_public: true });
       // API creates a book immediately; navigate to my-books
-      navigate("/my-books");
+      goToMyBooks();
     } catch (err) {
       setError(err?.response?.data?.detail || "ISBN fetch/create failed");
     } finally { setLoading(false); }
