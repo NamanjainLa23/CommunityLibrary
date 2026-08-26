@@ -79,7 +79,7 @@ export default function Login() {
               {wakeMessage}
             </div>
           )}
-          <button className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700" disabled={waking}>Login{waking ? "Starting server…" : "Login"}</button>
+          <button className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700" disabled={waking}>{waking ? "Starting server…" : "Login"}</button>
         </form>
         <p className="mt-4 text-center text-sm">
           New here? <Link to="/signup" className="text-indigo-600">Create account</Link>
