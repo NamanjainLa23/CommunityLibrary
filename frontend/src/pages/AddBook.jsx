@@ -13,6 +13,7 @@ export default function AddBook() {
   const goToMyBooks = () => {
     if (onSuccess) onSuccess();
     else navigate("/dashboard", { state: { tab: "profile", profileSection: "books" } });
+  };
 
   const createManual = async (e) => {
     e.preventDefault();
