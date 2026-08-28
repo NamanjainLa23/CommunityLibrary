@@ -64,7 +64,7 @@ export default function Search() {
             <div className="flex-1">
               <div className="font-medium">{b.title}</div>
               <div className="text-sm text-gray-600">{b.author}</div>
-              <div className="text-xs text-gray-500">ISBN: {formatIsbn(b.isbn)} — Owner ID: {b.owner_id}</div>
+              <div className="text-xs text-gray-500">ISBN: {formatIsbn(b.isbn)}</div>
             </div>
             <div className="flex flex-col gap-2">
             {requestedBookIds.has(String(b.id)) ? (
