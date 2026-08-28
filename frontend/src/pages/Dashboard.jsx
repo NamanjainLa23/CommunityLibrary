@@ -55,7 +55,7 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <button onClick={() => setTab("profile")} className="text-sm text-indigo-600">
+            <button onClick={() => setTab("profile")} className={`text-sm ${tab === "profile" ? "font-semibold text-indigo-700" : "text-indigo-600"}`}>
               My Profile
             </button>
             <button onClick={logout} className="bg-red-500 text-white px-3 py-1 rounded">
@@ -103,7 +103,7 @@ export default function Dashboard() {
                 </div>
                 {profileSection === "books" && <MyBooks />}
                 {profileSection === "borrowed" && <BorrowedBooks />}
-                {profileSection === "add" && (<AddBook onSuccess={() => {setTab("profile"); setProfileSection("books");}} />)}
+                {profileSection === "add" && (<AddBook onSuccess={() => {setProfileSection("books");}} />)}
                 {profileSection === "admin" && user?.is_admin && <AdminJoinRequests />}
               </div>
             )}
