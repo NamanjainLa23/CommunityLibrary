@@ -12,7 +12,6 @@ import AdminJoinRequests from "./AdminJoinRequests";
 import api from "../services/api";
 
 const TABS = [
-  { key: "profile", label: "My Profile" },
   { key: "nearby", label: "Nearby Books" },
   { key: "communities", label: "Communities" },
   { key: "requests", label: "Requests" },
