@@ -44,73 +44,82 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 overflow-x-hidden">
+    <div className="min-h-screen bg-paper text-ink p-3 sm:p-6 overflow-x-hidden">
       <div className="max-w-5xl mx-auto w-full">
-        <div className="bg-white rounded-xl shadow p-4 sm:p-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
-            <h2 className="text-xl font-semibold">Dashboard</h2>
-            <p className="text-sm text-gray-600">
-              {user?.username ? `Signed in as ${user.username}` : "Manage your personal library."}
+            <p className="text-xs tracking-[0.25em] uppercase text-muted">Community Library</p>
+            <h1 className="font-serif text-3xl mt-1">Your shelf</h1>
+            <p className="text-sm text-muted mt-1">
+              {user?.username ? `Signed in as ${user.username}` : "Borrow, lend, belong."}
             </p>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <button onClick={() => setTab("profile")} className={`text-sm ${tab === "profile" ? "font-semibold text-indigo-700" : "text-indigo-600"}`}>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setTab("profile")}
+              className={`px-4 py-2 rounded-full text-sm ${
+                tab === "profile"
+                  ? "bg-accent text-white"
+                  : "bg-page border border-line text-ink hover:border-accent"
+              }`}
+            >
               My Profile
             </button>
-            <button onClick={logout} className="bg-red-500 text-white px-3 py-1 rounded">
+            <button
+              onClick={logout}
+              className="px-4 py-2 rounded-full text-sm border border-line bg-page text-muted hover:text-red-800"
+            >
               Logout
             </button>
           </div>
-        </div>
-
-        <div className="mt-4 sm:mt-6 bg-white rounded-xl shadow p-3 sm:p-4 overflow-hidden">
-          <div className="border-b mb-4 -mx-3 px-3 sm:mx-0 sm:px-0">
-            <nav className="flex gap-1 overflow-x-auto whitespace-nowrap pb-px">
-              {TABS.map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className={`px-3 py-2 -mb-px shrink-0 text-sm ${
-                    tab === t.key
-                      ? "border-b-2 border-indigo-600 text-indigo-600"
-                      : "text-gray-600"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          <div className="min-w-0">
-            {tab === "profile" && (
-              <div>
-                <div className="flex gap-2 overflow-x-auto mb-4">
-                  {profileSections.map((s) => (
-                    <button
-                      key={s.key}
-                      onClick={() => setProfileSection(s.key)}
-                      className={`px-3 py-1.5 rounded-full text-sm shrink-0 ${
-                        profileSection === s.key
-                          ? "bg-indigo-600 text-white"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-                {profileSection === "books" && <MyBooks />}
-                {profileSection === "borrowed" && <BorrowedBooks />}
-                {profileSection === "add" && (<AddBook onSuccess={() => {setProfileSection("books");}} />)}
-                {profileSection === "admin" && user?.is_admin && <AdminJoinRequests />}
+        </header>
+  
+        <nav className="flex gap-2 overflow-x-auto pb-2 mb-4">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-4 py-2 rounded-full text-sm shrink-0 ${
+                tab === t.key
+                  ? "bg-accent text-white shadow-sm"
+                  : "bg-page border border-line text-muted hover:text-ink"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+  
+        <div className="bg-page border border-line rounded-3xl shadow-[0_16px_40px_rgba(80,50,20,0.08)] p-4 sm:p-6 min-w-0">
+          {tab === "profile" && (
+            <div>
+              <div className="flex gap-2 overflow-x-auto mb-5">
+                {profileSections.map((s) => (
+                  <button
+                    key={s.key}
+                    onClick={() => setProfileSection(s.key)}
+                    className={`px-3 py-1.5 rounded-full text-sm shrink-0 ${
+                      profileSection === s.key
+                        ? "bg-ink text-page"
+                        : "bg-paper text-muted border border-line"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
               </div>
-            )}
-            {tab === "nearby" && <NearbyBooks />}
-            {tab === "communities" && <Communities />}
-            {tab === "requests" && <Requests />}
-            {tab === "lent" && <LentBooks />}
-          </div>
+              {profileSection === "books" && <MyBooks />}
+              {profileSection === "borrowed" && <BorrowedBooks />}
+              {profileSection === "add" && (
+                <AddBook onSuccess={() => setProfileSection("books")} />
+              )}
+              {profileSection === "admin" && user?.is_admin && <AdminJoinRequests />}
+            </div>
+          )}
+          {tab === "nearby" && <NearbyBooks />}
+          {tab === "communities" && <Communities />}
+          {tab === "requests" && <Requests />}
+          {tab === "lent" && <LentBooks />}
         </div>
       </div>
     </div>

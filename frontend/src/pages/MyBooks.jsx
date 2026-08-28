@@ -50,7 +50,7 @@ export default function MyBooks() {
                   alt="cover"
                 />
               ) : (
-                <div className="w-14 h-20 bg-gray-100 rounded shrink-0" />
+                <img className="w-14 h-20 object-cover rounded-lg shadow-sm shrink-0"/>
               )}
               <div className="min-w-0 flex-1">
                 <div className="font-medium break-words">{b.title}</div>
@@ -61,7 +61,7 @@ export default function MyBooks() {
             <div className="flex flex-row sm:flex-col gap-3 sm:gap-2 sm:text-right shrink-0">
               <button
                 onClick={() => toggle(b)}
-                className="text-sm text-indigo-600"
+                className="text-sm text-accent"
               >
                 {b.is_public ? "Make Private" : "Make Public"}
               </button>
