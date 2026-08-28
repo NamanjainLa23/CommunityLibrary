@@ -27,7 +27,6 @@ Requirements
 SMTP - google app, email id and password
 
 ToDo
-Profile page - update details - my books, borrowed books, add books
 dashboard keep minimal - communities and search, requests, lent
 Admin approve/reject request and page
 Return Request
