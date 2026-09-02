@@ -142,6 +142,9 @@ def decide_join(community_id: UUID, req_id: int, payload: JoinRequestUpdate, db:
         raise HTTPException(status_code=404, detail="Join request not found")
 
     if payload.status == "approved":
+        member = db.query(UserModel).filter(UserModel.id == req.user_id).first()
+        if member and member not in c.members:
+            c.members.append(member)
         db.add(CommunityMembership(user_id=req.user_id, community_id=c.id, role="member"))
         req.status = "approved"
         db.add(req)
