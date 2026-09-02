@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+a,
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
 @theme {
     --color-paper: #f4efe6;
     --color-page: #fffaf3;

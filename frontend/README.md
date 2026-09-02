@@ -27,9 +27,10 @@ Requirements
 SMTP - google app, email id and password
 
 ToDo
-dashboard keep minimal - communities and search, requests, lent
+
 Admin approve/reject request and page
 Return Request
 borrow request reverted after 15 days
 barcode scanner for isbn, bulk upload 
 automated app like login/logout from browser
+indexes - fast search
